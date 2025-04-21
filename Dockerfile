@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libtbb-dev \
     libeigen3-dev \
+    make \
     ninja-build \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*

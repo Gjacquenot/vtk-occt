@@ -1,11 +1,14 @@
-build:
-	docker build -t vtk-occ-norender .
+all: docker_build docker_run
 
-run:
-	docker run -it --rm -v $(shell pwd):/workspace vtk-occ-norender
+docker_build:
+	docker build -t vtk-occ .
+
+docker_run:
+	docker run --rm -v $(shell pwd):/workspace vtk-occ bash -c "\
+		cd /workspace && make compile && ./build/vtk_occ"
 
 compile:
-	mkdir build
-	cd build
-	cmake .. -DOpenCASCADE_DIR=$OpenCASCADE_DIR -DVTK_DIR=$VTK_DIR
-	make
+	mkdir -p build \
+	&& cd build \
+	&& cmake .. -DOpenCASCADE_DIR=/opt/occt/lib/cmake/opencascade -DVTK_DIR=/opt/vtk/lib/cmake/vtk \
+	&& make
