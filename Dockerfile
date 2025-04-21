@@ -61,16 +61,16 @@ RUN mkdir -p /opt/vtk/build && cd /opt/vtk/build && \
     cmake -G Ninja ../ \
       -D CMAKE_BUILD_TYPE=Release \
       -D VTK_BUILD_ALL_MODULES=OFF \
-      -D VTK_GROUP_ENABLE_Rendering=NO \
-      -D VTK_GROUP_ENABLE_StandAlone=NO \
-      -D VTK_GROUP_ENABLE_Imaging=YES \
+      -D VTK_GROUP_ENABLE_Rendering=OFF \
+      -D VTK_GROUP_ENABLE_StandAlone=ON \
+      -D VTK_GROUP_ENABLE_Imaging=ON \
       -D CMAKE_INSTALL_PREFIX=/opt/vtk-install \
-      -D BUILD_DOCUMENTATION:BOOL=NO \
-      -D BUILD_EXAMPLES:BOOL=NO \
-      -D BUILD_TESTING:BOOL=NO \
-      -D BUILD_SHARED_LIBS:BOOL=NO \
-      -D VTK_USE_X:BOOL=NO \
-      -D VTK_Group_MPI:BOOL=NO \
+      -D BUILD_DOCUMENTATION:BOOL=OFF \
+      -D BUILD_EXAMPLES:BOOL=OFF \
+      -D BUILD_TESTING:BOOL=OFF \
+      -D BUILD_SHARED_LIBS:BOOL=OFF \
+      -D VTK_USE_X:BOOL=OFF \
+      -D VTK_Group_MPI:BOOL=OFF \
       -D CMAKE_C_FLAGS="-fPIC" \
       -D CMAKE_CXX_FLAGS="-fPIC" \
     && ninja install
