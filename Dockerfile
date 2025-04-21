@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     wget \
     curl \
+    libfontconfig1-dev \
     libgl1-mesa-dev \
     libx11-dev \
     libxi-dev \
