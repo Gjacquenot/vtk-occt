@@ -30,16 +30,15 @@ WORKDIR /opt
 ########################################
 ARG VTK_VERSION=v9.4.2
 
-RUN git clone --branch ${VTK_VERSION} https://gitlab.kitware.com/vtk/vtk.git
-
-RUN mkdir -p /opt/vtk/build && cd /opt/vtk/build && \
+RUN git clone --branch ${VTK_VERSION} https://gitlab.kitware.com/vtk/vtk.git /opt/vtk_src \
+ && mkdir -p /opt/vtk_src/build && cd /opt/vtk_src/build && \
     cmake -G Ninja ../ \
       -D CMAKE_BUILD_TYPE=Release \
+      -D CMAKE_INSTALL_PREFIX=/opt/vtk \
       -D VTK_BUILD_ALL_MODULES=OFF \
-      -D VTK_GROUP_ENABLE_Rendering=NO \
+      -D VTK_GROUP_ENABLE_Rendering=DONT_WANT \
       -D VTK_GROUP_ENABLE_StandAlone=YES \
       -D VTK_GROUP_ENABLE_Imaging=YES \
-      -D CMAKE_INSTALL_PREFIX=/opt/vtk-install \
       -D BUILD_DOCUMENTATION:BOOL=NO \
       -D BUILD_EXAMPLES:BOOL=NO \
       -D BUILD_TESTING:BOOL=NO \
@@ -48,21 +47,21 @@ RUN mkdir -p /opt/vtk/build && cd /opt/vtk/build && \
       -D VTK_Group_MPI:BOOL=NO \
       -D CMAKE_C_FLAGS="-fPIC" \
       -D CMAKE_CXX_FLAGS="-fPIC" \
-    && ninja install
+    && ninja install \
+    && rm -rf /opt/vtk_src
 
-ENV VTK_DIR=/opt/vtk-install/lib/cmake/vtk-9.4
+ENV VTK_DIR=/opt/vtk/lib/cmake/vtk-9.4
 
 ########################################
 # Build OpenCASCADE (OCCT)
 ########################################
 ARG OCCT_VERSION=V7_9_0
 
-RUN git clone --depth 1 --branch ${OCCT_VERSION} https://github.com/Open-Cascade-SAS/OCCT.git
-
-RUN mkdir -p /opt/OCCT/build && cd /opt/OCCT/build && \
+RUN git clone --depth 1 --branch ${OCCT_VERSION} https://github.com/Open-Cascade-SAS/OCCT.git /opt/occt_src
+RUN mkdir -p /opt/occt_src/build && cd /opt/occt_src/build && \
     cmake -G Ninja ../ \
       -D CMAKE_BUILD_TYPE=Release \
-      -D INSTALL_DIR=/opt/occt-install \
+      -D INSTALL_DIR=/opt/occt \
       -D BUILD_MODULE_Draw=OFF \
       -D BUILD_LIBRARY_TYPE=Shared \
       -D USE_TBB=ON \
@@ -73,10 +72,10 @@ RUN mkdir -p /opt/OCCT/build && cd /opt/OCCT/build && \
       -D USE_EIGEN=ON \
       -D USE_FREEIMAGE=OFF \
       -D USE_VTK=OFF \
-    && ninja install -j 8
+    && ninja install \
+    && rm -rf /opt/occt_src
 
-ENV OpenCASCADE_DIR=/opt/occt-install
-
+ENV OpenCASCADE_DIR=/opt/occt
 
 ########################################
 # Setup user and entry
