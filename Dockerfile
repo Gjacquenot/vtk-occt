@@ -26,6 +26,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /opt
 
 ########################################
+# Build VTK (without rendering)
+########################################
+ARG VTK_VERSION=v9.4.2
+
+RUN git clone --branch ${VTK_VERSION} https://gitlab.kitware.com/vtk/vtk.git
+
+RUN mkdir -p /opt/vtk/build && cd /opt/vtk/build && \
+    cmake -G Ninja ../ \
+      -D CMAKE_BUILD_TYPE=Release \
+      -D VTK_BUILD_ALL_MODULES=OFF \
+      -D VTK_GROUP_ENABLE_Rendering=OFF \
+      -D VTK_GROUP_ENABLE_StandAlone=YES \
+      -D VTK_GROUP_ENABLE_Imaging=ON \
+      -D CMAKE_INSTALL_PREFIX=/opt/vtk-install \
+      -D BUILD_DOCUMENTATION:BOOL=OFF \
+      -D BUILD_EXAMPLES:BOOL=OFF \
+      -D BUILD_TESTING:BOOL=OFF \
+      -D BUILD_SHARED_LIBS:BOOL=OFF \
+      -D VTK_USE_X:BOOL=OFF \
+      -D VTK_Group_MPI:BOOL=OFF \
+      -D CMAKE_C_FLAGS="-fPIC" \
+      -D CMAKE_CXX_FLAGS="-fPIC" \
+    && ninja install
+
+ENV VTK_DIR=/opt/vtk-install/lib/cmake/vtk-9.4
+
+########################################
 # Build OpenCASCADE (OCCT)
 ########################################
 ARG OCCT_VERSION=V7_9_0
@@ -50,32 +77,6 @@ RUN mkdir -p /opt/OCCT/build && cd /opt/OCCT/build && \
 
 ENV OpenCASCADE_DIR=/opt/occt-install
 
-########################################
-# Build VTK (without rendering)
-########################################
-ARG VTK_VERSION=v9.4.2
-
-RUN git clone --branch ${VTK_VERSION} https://gitlab.kitware.com/vtk/vtk.git
-
-RUN mkdir -p /opt/vtk/build && cd /opt/vtk/build && \
-    cmake -G Ninja ../ \
-      -D CMAKE_BUILD_TYPE=Release \
-      -D VTK_BUILD_ALL_MODULES=OFF \
-      -D VTK_GROUP_ENABLE_Rendering=OFF \
-      -D VTK_GROUP_ENABLE_StandAlone=ON \
-      -D VTK_GROUP_ENABLE_Imaging=ON \
-      -D CMAKE_INSTALL_PREFIX=/opt/vtk-install \
-      -D BUILD_DOCUMENTATION:BOOL=OFF \
-      -D BUILD_EXAMPLES:BOOL=OFF \
-      -D BUILD_TESTING:BOOL=OFF \
-      -D BUILD_SHARED_LIBS:BOOL=OFF \
-      -D VTK_USE_X:BOOL=OFF \
-      -D VTK_Group_MPI:BOOL=OFF \
-      -D CMAKE_C_FLAGS="-fPIC" \
-      -D CMAKE_CXX_FLAGS="-fPIC" \
-    && ninja install
-
-ENV VTK_DIR=/opt/vtk-install/lib/cmake/vtk-9.4
 
 ########################################
 # Setup user and entry
