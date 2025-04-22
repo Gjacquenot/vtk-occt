@@ -54,17 +54,14 @@ vtkSmartPointer<vtkPolyData> ConvertSTEPToPolyData(const std::string& stepFile)
 
         if (tri.IsNull()) continue;
 
-        const TColgp_Array1OfPnt& nodes = tri->Nodes();
-        const Poly_Array1OfTriangle& trianglesArray = tri->Triangles();
-
-        Standard_Integer nbNodes = tri->NbNodes();
-        Standard_Integer nbTriangles = tri->NbTriangles();
+        const int nbNodes = tri->NbNodes();
+        const int nbTriangles = tri->NbTriangles();
 
         std::vector<vtkIdType> vtkPointIds(nbNodes + 1); // 1-based indexing in OCCT
 
-        for (Standard_Integer i = 1; i <= nbNodes; ++i) {
+        for (int i = 1; i <= nbNodes; ++i) {
             gp_Pnt p = tri->Node(i).Transformed(loc.Transformation());
-
+        
             auto it = pointMap.find(p);
             if (it == pointMap.end()) {
                 vtkIdType id = points->InsertNextPoint(p.X(), p.Y(), p.Z());
@@ -74,11 +71,12 @@ vtkSmartPointer<vtkPolyData> ConvertSTEPToPolyData(const std::string& stepFile)
                 vtkPointIds[i] = it->second;
             }
         }
-
-        for (Standard_Integer i = 1; i <= nbTriangles; ++i) {
+        
+        for (int i = 1; i <= nbTriangles; ++i) {
             int n1, n2, n3;
             tri->Triangle(i).Get(n1, n2, n3);
-            vtkSmartPointer<vtkTriangle> triangle = vtkSmartPointer<vtkTriangle>::New();
+        
+            auto triangle = vtkSmartPointer<vtkTriangle>::New();
             triangle->GetPointIds()->SetId(0, vtkPointIds[n1]);
             triangle->GetPointIds()->SetId(1, vtkPointIds[n2]);
             triangle->GetPointIds()->SetId(2, vtkPointIds[n3]);
