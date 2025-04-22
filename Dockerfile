@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     ninja-build \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /opt
