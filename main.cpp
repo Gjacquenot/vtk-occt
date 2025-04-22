@@ -37,12 +37,15 @@ vtkSmartPointer<vtkPolyData> ConvertSTEPToPolyData(const std::string& stepFile)
     BRepMesh_IncrementalMesh mesh(shape, 0.5); // 0.5 = deflection (mesh fineness)
 
     // Map to store already inserted points
-    std::map<gp_Pnt, vtkIdType, bool(*)(const gp_Pnt&, const gp_Pnt&)> pointMap([](const gp_Pnt& a, const gp_Pnt& b) {
-        const double eps = 1e-6;
+    auto comp = [](const gp_Pnt& a, const gp_Pnt& b) {
+        constexpr double eps = 1e-6;
         if (fabs(a.X() - b.X()) > eps) return a.X() < b.X();
         if (fabs(a.Y() - b.Y()) > eps) return a.Y() < b.Y();
         return a.Z() < b.Z();
-    });
+    };
+
+    std::map<gp_Pnt, vtkIdType, decltype(comp)> pointMap(comp);
+
 
     for (TopExp_Explorer faceExplorer(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next()) {
         TopoDS_Face face = TopoDS::Face(faceExplorer.Current());
@@ -54,11 +57,14 @@ vtkSmartPointer<vtkPolyData> ConvertSTEPToPolyData(const std::string& stepFile)
         const TColgp_Array1OfPnt& nodes = tri->Nodes();
         const Poly_Array1OfTriangle& trianglesArray = tri->Triangles();
 
-        std::vector<vtkIdType> vtkPointIds(nodes.Length() + 1);
-        for (int i = nodes.Lower(); i <= nodes.Upper(); ++i) {
-            gp_Pnt p = nodes(i).Transformed(loc.Transformation());
+        Standard_Integer nbNodes = tri->NbNodes();
+        Standard_Integer nbTriangles = tri->NbTriangles();
 
-            // Avoid duplicate insertion
+        std::vector<vtkIdType> vtkPointIds(nbNodes + 1); // 1-based indexing in OCCT
+
+        for (Standard_Integer i = 1; i <= nbNodes; ++i) {
+            gp_Pnt p = tri->Node(i).Transformed(loc.Transformation());
+
             auto it = pointMap.find(p);
             if (it == pointMap.end()) {
                 vtkIdType id = points->InsertNextPoint(p.X(), p.Y(), p.Z());
@@ -69,9 +75,9 @@ vtkSmartPointer<vtkPolyData> ConvertSTEPToPolyData(const std::string& stepFile)
             }
         }
 
-        for (int i = trianglesArray.Lower(); i <= trianglesArray.Upper(); ++i) {
+        for (Standard_Integer i = 1; i <= nbTriangles; ++i) {
             int n1, n2, n3;
-            trianglesArray(i).Get(n1, n2, n3);
+            tri->Triangle(i).Get(n1, n2, n3);
             vtkSmartPointer<vtkTriangle> triangle = vtkSmartPointer<vtkTriangle>::New();
             triangle->GetPointIds()->SetId(0, vtkPointIds[n1]);
             triangle->GetPointIds()->SetId(1, vtkPointIds[n2]);
