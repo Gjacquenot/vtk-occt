@@ -19,8 +19,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Output success message
-      - name: Print success message
+      # Define image name
+      - name: Set up image name
+        run: echo "IMAGE_NAME=sirehna/base-image-ubuntu24-gcc13-vtk9-occt7:2025-04-22" >> $GITHUB_ENV
+
+      - name: Try to pull the image
+        run: docker pull ${{ env.IMAGE_NAME }} || echo "Image not found, proceeding to build."
+
+      - name: Build the image
         run: make
 
       # Log in to Docker Hub
@@ -30,9 +36,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Define image name
-      - name: Set up image name
-        run: echo "IMAGE_NAME=sirehna/base-image-ubuntu24-gcc13-vtk9-occt7:2025-04-22" >> $GITHUB_ENV
 
       # Build and push Docker image
       - name: Build and push Docker image
