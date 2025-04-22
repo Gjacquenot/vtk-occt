@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Find VTK
 find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
 
 # Find OpenCASCADE
 find_package(OpenCASCADE REQUIRED)
